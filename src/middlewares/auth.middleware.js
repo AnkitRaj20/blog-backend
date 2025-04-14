@@ -25,6 +25,12 @@ export const verifyToken = asyncHandler(async (req, _, next) => {
     req.user = user;
     next();
   } catch (error) {
-    throw new ApiError(401, error?.message || "Invalid access token");
+    if (error.name === "TokenExpiredError") {
+      throw new ApiError(403, "Token has expired. Please log in again.");
+    }
+    if (error.name === "JsonWebTokenError") {
+      throw new ApiError(401, "Invalid token.");
+    }
+    throw new ApiError(500, "An error occurred while verifying the token.");
   }
 });
